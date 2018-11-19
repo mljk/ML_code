@@ -1,0 +1,18 @@
+def input_fn(batch_size):
+  files = tf.data.Dataset.list_files(FLAG.data_dir)
+
+  def tfrecord_dataset(filename):
+    buffer_size = 8 * 1024 * 1024
+    return tf.data.TFRecordDataset(filename, buffer_size=buffer_size)
+
+  dataset = files.apply(tf.contrib.data.parallel_interleave( tfrecord_dataset, cycle_length = 32, sloppy=True))
+  dataset = dataset.apply(tf.contrib.data.map_and_batch(parser_fn, batch_size, num_parallel_batches=4))
+  dataset = dataset.prefetch(4)
+  return dataset
+
+
+
+
+
+input_fn(100)
+FLAG.data_dir	
